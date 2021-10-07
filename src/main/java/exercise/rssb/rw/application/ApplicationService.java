@@ -46,7 +46,7 @@ public class ApplicationService implements IApplicationService {
 			XSSFSheet sheet = wb.getSheetAt(0);
 
 			int lastIndex = sheet.getLastRowNum();
-//			processData(sheet, 1, lastIndex);
+			processData(sheet, 1, lastIndex);
 //			ExecutorService es = Executors.newCachedThreadPool();
 /*			if(lastIndex > 5000){
 				for(int i = 1; i <= lastIndex; i+=5000){
