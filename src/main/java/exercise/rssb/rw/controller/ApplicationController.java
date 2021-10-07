@@ -38,9 +38,8 @@ public class ApplicationController {
 	}
 
 	@PostMapping("data/save")
-	public Response<Customer> createCustomer(){
-//		return applicationService.persistCustomer(customer);
-		return new Response<>(new Customer());
+	public Response<String> createCustomer(){
+		return applicationService.persistCustomers();
 	}
 
 	@PostMapping("data/upload")

@@ -18,4 +18,6 @@ public interface IApplicationService {
 	Response<List<Customer>> getCustomers();
 	Response<List<ValidationFailure>> getFailedCustomers();
 	Response<UploadedDataDTO> processFile(MultipartFile file);
+
+	Response<String> persistCustomers();
 }

@@ -3,15 +3,18 @@ package exercise.rssb.rw.application;
 import exercise.rssb.rw.model.Customer;
 import exercise.rssb.rw.model.UploadedDataDTO;
 import exercise.rssb.rw.model.ValidationFailure;
+import exercise.rssb.rw.repository.ICustomerRepository;
 import exercise.rssb.rw.util.Response;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -22,6 +25,8 @@ import java.util.List;
 @Service
 public class ApplicationService implements IApplicationService {
 
+	@Autowired
+	private ICustomerRepository repository;
 	private List<Customer> customers = new ArrayList<>();
 	private List<ValidationFailure> failedValidations = new ArrayList<>();
 
@@ -42,6 +47,11 @@ public class ApplicationService implements IApplicationService {
 			System.out.println(file.getName());
 			System.out.println(file.getOriginalFilename());
 			System.out.println(file.getResource());
+
+/*			Workbook workbook = StreamingReader.builder().rowCacheSize(100) // number of rows to keep in memory
+					.bufferSize(4096) // index of sheet to use (defaults to 0)
+					.open(file);*/
+
 
 			XSSFSheet sheet = wb.getSheetAt(0);
 
@@ -74,8 +84,12 @@ public class ApplicationService implements IApplicationService {
 	}
 
 	private void processData(XSSFSheet sheet, Integer startingIndex, Integer endingIndex){
-		for (int i = startingIndex; i <= endingIndex; i++) {
-			Row row = sheet.getRow(i);
+
+
+		Iterator<Row> rowIterator = sheet.rowIterator();
+		int i=1;
+		while (rowIterator.hasNext()) {
+			Row row = rowIterator.next();
 
 			String names = row.getCell(0).getStringCellValue();
 
@@ -100,7 +114,9 @@ public class ApplicationService implements IApplicationService {
 				validationFailure.setErrorMessages(errorMessages);
 				failedValidations.add(validationFailure);
 			}
+			i++;
 		}
+
 	}
 
 	private boolean validateCustomerData(String names, String nid, String phoneNumber, String gender, String email,
@@ -129,17 +145,14 @@ public class ApplicationService implements IApplicationService {
 		return !failed;
 	}
 
-
-	//@Override
-	public Response<Customer> persistCustomer() {
-		Customer customer = new Customer();
-		customer.setFullName("Test Name");
-		customer.setPhoneNumber("086454535345");
-		customer.setEmail("test@gmail.com");
-		customer.setGender("M");
-		customer.setIdentificationNumber("1199380015890102");
-
-		return null;
+	@Override
+	public Response<String> persistCustomers() {
+		try {
+			repository.saveAll(customers);
+			return new Response<>("Number of persisted customers: " +customers.size());
+		}catch (Exception ex){
+			return new Response<>(ex);
+		}
 	}
 
 }
